@@ -218,39 +218,8 @@ class ChangeDetector:
         print(f"{Fore.LIGHTCYAN_EX}unstaged_files{Style.RESET_ALL}: {unstaged_files}")
 
         for unstaged_file in unstaged_files:
-            # 连接repo_path和unstaged_file以获取完整的绝对路径
-            if unstaged_file.startswith(
-                setting.project.markdown_docs_name
-            ) or unstaged_file.startswith(setting.project.hierarchy_name):
-                # abs_unstaged_file = os.path.join(self.repo_path, unstaged_file)
-                # # # 获取相对于仓库根目录的相对路径
-                # # rel_unstaged_file = os.path.relpath(abs_unstaged_file, self.repo_path)
-                to_be_staged_files.append(unstaged_file)
-            elif unstaged_file == project_hierarchy:  # project_hierarchy永远add
-                to_be_staged_files.append(unstaged_file)
-            continue
-            abs_unstaged_file = os.path.join(self.repo_path, unstaged_file)
-            # 获取相对于仓库根目录的相对路径
-            rel_unstaged_file = os.path.relpath(abs_unstaged_file, self.repo_path)
-            print(f"rel_unstaged_file:{rel_unstaged_file}")
-            # 如果它是md文件
-            if unstaged_file.endswith(".md"):
-                # 把rel_unstaged_file从CONFIG['Markdown_Docs_folder']中拆离出来。判断是否能跟暂存区中的某一个.py文件对应上
-                rel_unstaged_file = os.path.relpath(
-                    rel_unstaged_file, setting.project.markdown_docs_name
-                )
-                corresponding_py_file = os.path.splitext(rel_unstaged_file)[0] + ".py"
-                print(f"corresponding_py_file:{corresponding_py_file}")
-                if corresponding_py_file in staged_files:
-                    # 如果是，那么就把这个md文件也加入到unstaged_files中
-                    to_be_staged_files.append(
-                        os.path.join(
-                            self.repo_path.lstrip("/"),
-                            setting.project.markdown_docs_name,
-                            rel_unstaged_file,
-                        )
-                    )
-            elif unstaged_file == project_hierarchy:  # project_hierarchy永远add
+            # If the file is a markdown file or the project hierarchy file, add it.
+            if unstaged_file.endswith(".md") or unstaged_file == project_hierarchy:
                 to_be_staged_files.append(unstaged_file)
         print(
             f"{Fore.LIGHTRED_EX}newly_staged_files{Style.RESET_ALL}: {to_be_staged_files}"

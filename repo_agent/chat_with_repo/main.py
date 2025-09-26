@@ -12,8 +12,7 @@ def main():
     # Load settings
     setting = SettingsManager.get_setting()
 
-    api_key = setting.chat_completion.openai_api_key.get_secret_value()
-    api_base = str(setting.chat_completion.openai_base_url)
+    api_key = setting.chat_completion.gemini_api_key.get_secret_value()
     db_path = (
         setting.project.target_repo
         / setting.project.hierarchy_name
@@ -21,7 +20,7 @@ def main():
     )
 
     # Initialize RepoAssistant
-    assistant = RepoAssistant(api_key, api_base, db_path)
+    assistant = RepoAssistant(api_key, db_path)
 
     # Extract data
     md_contents, meta_data = assistant.json_data.extract_data()
@@ -30,7 +29,7 @@ def main():
     logger.info("Starting vector store creation...")
     start_time = time.time()
     assistant.vector_store_manager.create_vector_store(
-        md_contents, meta_data, api_key, api_base
+        md_contents, meta_data, api_key
     )
     elapsed_time = time.time() - start_time
     logger.info(f"Vector store created successfully in {elapsed_time:.2f} seconds.")

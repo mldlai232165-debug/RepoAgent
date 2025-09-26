@@ -1,5 +1,4 @@
-from llama_index.llms.openai_like import OpenAILike
-
+from llama_index.llms.google_genai import GoogleGenAI
 from repo_agent.doc_meta_info import DocItem
 from repo_agent.log import logger
 from repo_agent.prompt import chat_template
@@ -14,14 +13,11 @@ class ChatEngine:
     def __init__(self, project_manager):
         setting = SettingsManager.get_setting()
 
-        self.llm = OpenAILike(
-            api_key=setting.chat_completion.openai_api_key.get_secret_value(),
-            api_base=setting.chat_completion.openai_base_url,
-            timeout=setting.chat_completion.request_timeout,
+        self.llm = GoogleGenAI(
+            api_key=setting.chat_completion.gemini_api_key.get_secret_value(),
             model=setting.chat_completion.model,
             temperature=setting.chat_completion.temperature,
-            max_retries=1,
-            is_chat_model=True,
+            request_timeout=setting.chat_completion.request_timeout,
         )
 
     def build_prompt(self, doc_item: DocItem):
@@ -119,13 +115,6 @@ class ChatEngine:
 
         try:
             response = self.llm.chat(messages)
-            logger.debug(f"LLM Prompt Tokens: {response.raw.usage.prompt_tokens}")  # type: ignore
-            logger.debug(
-                f"LLM Completion Tokens: {response.raw.usage.completion_tokens}"  # type: ignore
-            )
-            logger.debug(
-                f"Total LLM Token Count: {response.raw.usage.total_tokens}"  # type: ignore
-            )
             return response.message.content
         except Exception as e:
             logger.error(f"Error in llamaindex chat call: {e}")

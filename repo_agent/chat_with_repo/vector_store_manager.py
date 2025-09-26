@@ -11,7 +11,7 @@ from llama_index.core.node_parser import (
 )
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.retrievers import VectorIndexRetriever
-from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from repo_agent.log import logger
@@ -28,7 +28,7 @@ class VectorStoreManager:
         self.similarity_top_k = top_k
         self.llm = llm
 
-    def create_vector_store(self, md_contents, meta_data, api_key, api_base):
+    def create_vector_store(self, md_contents, meta_data, api_key):
         """
         Add markdown content and metadata to the index.
         """
@@ -49,10 +49,9 @@ class VectorStoreManager:
         chroma_collection = db.get_or_create_collection(self.collection_name)
 
         # Define embedding model
-        embed_model = OpenAIEmbedding(
-            model_name="text-embedding-3-large",
+        embed_model = GoogleGenAIEmbedding(
+            model_name="models/embedding-001",
             api_key=api_key,
-            api_base=api_base,
         )
 
         # Initialize semantic chunker (SimpleNodeParser)

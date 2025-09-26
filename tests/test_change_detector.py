@@ -1,6 +1,6 @@
 import os
 import unittest
-
+from unittest.mock import patch, Mock
 from git import Repo
 
 from repo_agent.change_detector import ChangeDetector
@@ -33,6 +33,22 @@ class TestChangeDetector(unittest.TestCase):
         # 模拟 Git 操作：添加和提交文件
         cls.repo.git.add(A=True)
         cls.repo.git.commit('-m', 'Initial commit')
+
+    def setUp(self):
+        """Set up the patch for SettingsManager."""
+        self.settings_patcher = patch('repo_agent.change_detector.SettingsManager')
+        self.mock_settings_manager = self.settings_patcher.start()
+
+        # Configure the mock to return a mock setting object
+        mock_setting = Mock()
+        mock_setting.project.ignore_list = []
+        mock_setting.project.markdown_docs_name = "markdown_docs"
+        mock_setting.project.hierarchy_name = ".project_doc_record"
+        self.mock_settings_manager.get_setting.return_value = mock_setting
+
+    def tearDown(self):
+        """Tear down the patch."""
+        self.settings_patcher.stop()
 
     def test_get_staged_pys(self):
         # 创建一个新的 Python 文件并暂存

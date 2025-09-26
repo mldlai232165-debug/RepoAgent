@@ -1,6 +1,6 @@
 import json
 
-from llama_index.llms.openai import OpenAI
+from llama_index.llms.google_genai import GoogleGenAI
 
 from repo_agent.chat_with_repo.json_handler import JsonFileProcessor
 from repo_agent.chat_with_repo.prompt import (
@@ -15,19 +15,17 @@ from repo_agent.log import logger
 
 
 class RepoAssistant:
-    def __init__(self, api_key, api_base, db_path):
+    def __init__(self, api_key, db_path):
         self.db_path = db_path
         self.md_contents = []
 
-        self.weak_model = OpenAI(
+        self.weak_model = GoogleGenAI(
             api_key=api_key,
-            api_base=api_base,
-            model="gpt-4o-mini",
+            model="gemini-1.5-flash",
         )
-        self.strong_model = OpenAI(
+        self.strong_model = GoogleGenAI(
             api_key=api_key,
-            api_base=api_base,
-            model="gpt-4o",
+            model="gemini-1.5-pro",
         )
         self.textanslys = TextAnalysisTool(self.weak_model, db_path)
         self.json_data = JsonFileProcessor(db_path)
@@ -43,17 +41,28 @@ class RepoAssistant:
 
     def rerank(self, query, docs):  # 这里要防止返回值格式上出问题
         response = self.weak_model.chat(
-            response_format={"type": "json_object"},
             temperature=0,
             messages=relevance_ranking_chat_template.format_messages(
                 query=query, docs=docs
             ),
         )
-        scores = json.loads(response.message.content)["documents"]  # type: ignore
-        logger.debug(f"scores: {scores}")
-        sorted_data = sorted(scores, key=lambda x: x["relevance_score"], reverse=True)
-        top_5_contents = [doc["content"] for doc in sorted_data[:5]]
-        return top_5_contents
+
+        content = response.message.content
+        try:
+            # Gemini models sometimes wrap JSON in ```json ... ``` markdown.
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0]
+
+            scores = json.loads(content)["documents"]  # type: ignore
+            logger.debug(f"scores: {scores}")
+            sorted_data = sorted(scores, key=lambda x: x["relevance_score"], reverse=True)
+            top_5_contents = [doc["content"] for doc in sorted_data[:5]]
+            return top_5_contents
+        except (json.JSONDecodeError, KeyError) as e:
+            logger.error(f"Failed to parse JSON from rerank response: {e}")
+            logger.error(f"Raw response: {content}")
+            # Fallback to returning top 5 docs without reranking if parsing fails
+            return docs[:5]
 
     def rag(self, query, retrieved_documents):
         rag_prompt = rag_template.format(

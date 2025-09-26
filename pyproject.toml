@@ -17,7 +17,7 @@ dependencies = [
     "click>=8.1.7",
     "python-iso639>=2024.10.22",
     "colorama>=0.4.6",
-    "llama-index-llms-openai-like>=0.3.3",
+    "llama-index-llms-google-genai>=0.1.2",
 ]
 name = "repoagent"
 version = "0.2.0"
@@ -39,7 +39,7 @@ repoagent = "repo_agent.main:cli"
 [project.optional-dependencies]
 chat_with_repo = [
     "markdown>=3.7",
-    "llama-index-embeddings-openai>=0.2.5",
+    "llama-index-embeddings-google-genai>=0.1.2",
     "llama-index-vector-stores-chroma>=0.3.0",
     "gradio>=5.6.0",
 ]

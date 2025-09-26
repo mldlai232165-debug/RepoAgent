@@ -48,7 +48,7 @@ def handle_setting_error(e: ValidationError):
 @click.option(
     "--model",
     "-m",
-    default="gpt-4o-mini",
+    default="gemini-1.5-flash",
     show_default=True,
     help="Specifies the model to use for completion.",
     type=str,
@@ -70,12 +70,11 @@ def handle_setting_error(e: ValidationError):
     type=int,
 )
 @click.option(
-    "--base-url",
-    "-b",
-    default="https://api.openai.com/v1",
-    show_default=True,
-    help="The base URL for the API calls.",
+    "--gemini-api-key",
+    "-k",
+    help="The API key for the Gemini API. If not provided, the GEMINI_API_KEY environment variable will be used.",
     type=str,
+    default=None,
 )
 @click.option(
     "--target-repo-path",
@@ -141,7 +140,7 @@ def run(
     model,
     temperature,
     request_timeout,
-    base_url,
+    gemini_api_key,
     target_repo_path,
     hierarchy_path,
     markdown_docs_path,
@@ -164,7 +163,7 @@ def run(
             model=model,
             temperature=temperature,
             request_timeout=request_timeout,
-            openai_base_url=base_url,
+            gemini_api_key=gemini_api_key,
             max_thread_count=max_thread_count,
         )
         set_logger_level_from_config(log_level=log_level)

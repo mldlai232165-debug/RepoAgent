@@ -1,11 +1,11 @@
-from llama_index.core.llms.function_calling import FunctionCallingLLM
-from llama_index.llms.openai import OpenAI
+from llama_index.core.llms.llm import LLM
+from llama_index.llms.google_genai import GoogleGenAI
 
 from repo_agent.chat_with_repo.json_handler import JsonFileProcessor
 
 
 class TextAnalysisTool:
-    def __init__(self, llm: FunctionCallingLLM, db_path):
+    def __init__(self, llm: LLM, db_path):
         self.jsonsearch = JsonFileProcessor(db_path)
         self.llm = llm
         self.db_path = db_path
@@ -56,9 +56,8 @@ The output function name or class name should be only one.
 
 
 if __name__ == "__main__":
-    api_base = "https://api.openai.com/v1"
-    api_key = "your_api_key"
+    api_key = "your_gemini_api_key"  # Replace with your actual Gemini API key
     log_file = "your_logfile_path"
-    llm = OpenAI(api_key=api_key, api_base=api_base)
+    llm = GoogleGenAI(api_key=api_key)
     db_path = "your_database_path"
     test = TextAnalysisTool(llm, db_path)
